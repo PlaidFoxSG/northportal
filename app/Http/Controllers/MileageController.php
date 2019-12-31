@@ -10,6 +10,7 @@ use App\Employee_detail;
 use App\User;
 use App\Agreeement;
 use Auth;
+use App\Company;
 //use App\Mileage;
 class MileageController extends Controller
 {
@@ -32,8 +33,8 @@ class MileageController extends Controller
     {   ob_start();
         $emp_id  =  auth()->user()->emp_id;
         $type  =  auth()->user()->user_type;
-       if($type== 'is_admin')$mileage_list = DB::table('mileages')->get();       
-       else  $mileage_list = DB::table('mileages')->where('emp_id','=',$emp_id)->get();
+       if($type == 'is_admin')$mileage_list = DB::table('mileages')->get();       
+       else  $mileage_list = DB::table('mileages')->where(array('emp_id'=>$emp_id,'status'=>'A'))->get();
         foreach($mileage_list as $mlist)
         {
         ?>
@@ -41,7 +42,8 @@ class MileageController extends Controller
                 <td><?= $mlist->date?></td>
                 <td><?= $mlist->reasonmileage?></td>
                 <td><?= $mlist->kilometers?></td>
-                <td class="action-box"><a href="javascript:void();" data-toggle="modal" data-target="#mileage-modal" data="<?= $mlist->id?>" class="edit_mileage" onclick="edit_mileage(<?= $mlist->id?>)">EDIT</a><a href="#" class="down">DELETE</a></td>
+                <td class="action-box"><a href="javascript:void();" data-toggle="modal" data-target="#mileage-modaledit" data="<?= $mlist->id?>" class="edit_mileage" onclick="edit_mileage(<?= $mlist->id?>)">EDIT</a>
+                <a href="#" class="down" onclick="delete_mileage(<?= $mlist->id?>);">DELETE</a></td>
             </tr>
             <tr class="spacer"></tr>
 
@@ -70,10 +72,40 @@ class MileageController extends Controller
 
     }
 
+    function updatemileage(Request $request)
+    {   $emp_id  =  auth()->user()->emp_id;
+        $conditions = array('id'=>$request->editmileage_id,'emp_id'=>$emp_id);
+        DB::table('mileages')->where($conditions)->update(
+                    [   'date' => $request->date,
+                        'company' => $request->companyname,                    
+                        'vehicle' => $request->vehicle,
+                        'kilometers' => $request->kilometers,
+                        'reasonmileage' => $request->reasonformileage,
+                    ]);
+
+
+    }
+
 
     function get_mileage($id)
     {
-        echo $id;
+        $data['companies'] = Company::all();
+        $emp_id  =  auth()->user()->emp_id;
+        $type  =  auth()->user()->user_type;
+       if($type== 'is_admin')$mileage_list = DB::table('mileages')->first();       
+       else {
+        $data['mileagedetails'] = DB::table('mileages')
+            ->where(array('id'=>$id,'emp_id'=>$emp_id))->first();
+            }
+        return view('mileage',$data);
+    }
+
+    function deletemileage($id)
+    {
+        $emp_id  =  auth()->user()->emp_id;
+        $conditions = array('id'=>$id,'emp_id'=>$emp_id);
+        DB::table('mileages')->where($conditions)->update(['status' => 'D']);
+       
     }
 
     

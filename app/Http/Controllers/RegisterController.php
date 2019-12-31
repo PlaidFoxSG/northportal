@@ -44,6 +44,7 @@ class RegisterController extends Controller
 
     protected function store(Request $request)
     {   
+         
         //  auth()->user()->givePermissionTo('Employe Panel');
         //  auth()->user()->assignRole('Employe');die;
         //  $users= \App\User::with('roles')->get();
@@ -54,18 +55,14 @@ class RegisterController extends Controller
         //  $request->validate([
         //     'personalemail' =>  ['required|string|email|max:255'],
         //  ]);
-        $check_email=user::where(['email' => $request->personalemail])->count();
-        if($check_email == 1){
-          return back()->with('error', 'This Email Already Available Please Try Another EMail !!');
-        }
-        $name = '';
+            $name = '';
         if($request->hasFile('profilepic')) { 
 
         $file = $request->file('profilepic');
         $name = rand(11111, 99999) . '.' . $file->getClientOriginalExtension();
         $request->file('profilepic')->move("public/profile", $name);
        }
-        $Employee_detail = Employee_detail::create([
+         $employee_detailsarray =array(
             'firstname'=> $request->firstname,
             'lastname' => $request->lastname,
             'personalemail' => $request->personalemail,
@@ -86,14 +83,23 @@ class RegisterController extends Controller
             'reltn_emergency_contact' => $request->rel_emer_contact,
             'emergency_contact_email' => $request->emergency_email, 
             'emergency_contact_phone' => $request->emer_contact_phone,
-        ]); 
+        );
+
+
+        if($request->login_type == 'adminlogin')
+        {
+            $check_email=user::where(['email' => $request->personalemail])->count();
+            if($check_email == 1){
+              return back()->with('error', 'This Email Already Available Please Try Another EMail !!');
+            }
+        $Employee_detail = Employee_detail::create($employee_detailsarray); 
         $last_id=$Employee_detail->id;
         $user_detail = User::create([
             'emp_id' =>$last_id,
             'name' =>$request->firstname.' '.$request->lastname,
             'password' =>Hash::make($request->password),
             'email' =>$request->personalemail,
-            'user_type' => 'employe'
+            'user_type' => 'employee'
         ]);
         if($user_detail){
            //$role = Role::create(['name' => 'Employe']);
@@ -107,6 +113,12 @@ class RegisterController extends Controller
         }
 
          return back()->with('message', 'Your information is submitted Successfully');
+      }
+      else
+      {
+        $Employee_detail = Employee_detail::where('id','=',auth()->user()->emp_id)->update($employee_detailsarray); 
+        return back()->with('message', 'Your information is submitted Successfully');
+      }
     }
   
     public function reset_apssword(Request $request){

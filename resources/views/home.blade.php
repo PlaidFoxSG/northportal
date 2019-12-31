@@ -14,7 +14,8 @@
                         <a class="nav-item nav-link active" id="nav-employee-tab" data-toggle="tab" href="#nav-employee" role="tab" aria-controls="nav-employee" aria-selected="true">Employee Information</a>
                         <a class="nav-item nav-link" id="nav-agreements-tab" data-toggle="tab" href="#nav-agreements" role="tab" aria-controls="nav-agreements" aria-selected="false" onclick="employee_agreement()">Agreements</a>
                         <a class="nav-item nav-link" id="nav-statements-tab" data-toggle="tab" href="#nav-statements" role="tab" aria-controls="nav-statements" aria-selected="false">Pay Statements</a>
-                        <a class="nav-item nav-link" id="nav-mileage-tab" data-toggle="tab" href="#nav-mileageemployee" role="tab" aria-controls="nav-mileage" aria-selected="false" onclick="get_mileagelist()">Mileage Book</a>
+                        <!--<a class="nav-item nav-link" id="nav-mileage-tab" data-toggle="tab" href="#nav-mileageemployee" role="tab" aria-controls="nav-mileage" aria-selected="false" onclick="get_mileagelist()">Mileage Book</a>-->
+
                       </div>
                   </div><!--------------container--------------->
                 </nav>
@@ -33,6 +34,7 @@
                       <div class="tab-pane fade show active" id="nav-employee" role="tabpanel" aria-labelledby="nav-employee-tab">
                     <form id="contacts_form" method="POST" name="contact-form" action="{{url('registration')}}" enctype="multipart/form-data">
                             @csrf
+                        <input type="hidden" name="login_type" value={{(auth()->user()->user_type == 'employee') ? 'employeelogin': 'adminlogin'}}>
                           <div class="personal">
                             <h2 class="form_title">Personal Information</h2>
                             <div class="row">
@@ -79,7 +81,7 @@
                                 <div class="col-md-3">
                                     <div class="text_outer">
                                         <label for="name" class="">Personal email</label>
-                                        <input type="email" id="personalemail" name="personalemail" class="form-control" placeholder="Personal Email" value={{isset($employee_details->personalemail) ?  $employee_details->personalemail : ''}}>
+                                        <input type="email" id="personalemail" name="personalemail" class="form-control" placeholder="Personal Email" value={{isset($employee_details->personalemail) ?  $employee_details->personalemail : ''}} {{(auth()->user()->user_type == 'employee') ? 'readonly': ''}}>
                                     </div>
                                 </div>
                                 
@@ -353,6 +355,8 @@
                         <a class="nav-item nav-link" id="nav-maintenance-tab" data-toggle="tab" href="#nav-maintenance" role="tab" aria-controls="nav-maintenance" aria-selected="false">Tech Maintenance</a>
                         <a class="nav-item nav-link" id="nav-time-tab" data-toggle="tab" href="#nav-time" role="tab" aria-controls="nav-time" aria-selected="false">Time Off</a>
                         <a class="nav-item nav-link" id="nav-concern_report-tab" data-toggle="tab" href="#nav-concern_report" role="tab" aria-controls="nav-concern_report" aria-selected="false">Report a Concern</a>
+
+                        <a class="nav-item nav-link" id="nav-statements-tab" data-toggle="tab" href="#nav-statements" role="tab" aria-controls="nav-statements" aria-selected="false">Pay Statements</a>
                       </div>
                   </div><!--------------container--------------->
                 </nav>
@@ -368,47 +372,8 @@
                       <!--------------employee-------------->
                         <div class="tab-pane fade" id="nav-expense" role="tabpanel" aria-labelledby="nav-employee-tab">
                             <div class="expense inner-tab-box">
-                                <h3><span  class="active-span" id="pending_span">Pending </span> | <span  id="historical_span"> Historical</span><span><i class="fa fa-plus" data-toggle="modal" data-target="#expense-modal" style="background-color:#cecece; font-size:11px; padding:5px; border-radius:50%;color:#fff; float:right;"></i></span></h3>
-                                <!--<div class="top_part_">
-                                    <ul>
-                                        <li>Date</li>
-                                        <li>Descripon</li>
-                                        <li>Total</li>
-                                    </ul>
-                                </div>
-                                <div class="download_file">
-                                    <div class="left_part">
-                                        <p>12/09/2019</p>
-                                        <p>Paper purchased for office printer</p>
-                                        <p>$7.50</p>
-                                    </div>
-                                    <div class="right_part">
-                                        <a href="#">EDIT</a>
-                                        <a href="#" class="down">DELETE</a>
-                                    </div>
-                                </div>
-                                <div class="download_file">
-                                    <div class="left_part">
-                                        <p>12/09/2019</p>
-                                        <p>Beverages purchased for PlaidFox clients</p>
-                                        <p>$5.00</p>
-                                    </div>
-                                    <div class="right_part">
-                                        <a href="#">EDIT</a>
-                                        <a href="#" class="down">DELETE</a>
-                                    </div>
-                                </div>
-                                <div class="download_file">
-                                    <div class="left_part">
-                                        <p>12/09/2019</p>
-                                        <p>Mailing fees paid for PlaidFox challenge invitations</p>
-                                        <p>$37.00</p>
-                                    </div>
-                                    <div class="right_part">
-                                        <a href="#">EDIT</a>
-                                        <a href="#" class="down">DELETE</a>
-                                    </div>
-                                </div>-->
+                                <h3><span  class="active-span" id="pending_span" onclick="expences_pending(this.value)">Pending </span> | <span  id="historical_span" onclick="expences_histocial(this.value)"> Historical</span><span><i class="fa fa-plus" data-toggle="modal" data-target="#expense-modal" style="background-color:#cecece; font-size:11px; padding:5px; border-radius:50%;color:#fff; float:right;"></i></span></h3>
+                                                                
                                 <div id="pending_div">
                                     <table style="width:100%;">
                                         <thead>
@@ -416,12 +381,12 @@
                                                 <th>Date</th>
                                                 <th>Description</th>
                                                 <th>Total</th>
+                                                <th>Action</th>
                                                 <th></th>
                                             </tr>
                                         </thead>
                                         <tbody class="return_expence_ajax">
-                                            
-                                            
+                                                                                    
                                         <tbody>
                                     </table>
                                 </div>
@@ -435,29 +400,10 @@
                                                 <th></th>
                                             </tr>
                                         </thead>
-                                        <tbody>
-                                            <tr style="margin-bottom:10px;">
-                                                <td>12/09/2019</td>
-                                                <td>Paper purchased for office printer</td>
-                                                <td>$7.50</td>
-                                                <td class="action-box"><a href="#">View</a></td>
-                                            </tr>
-                                            <tr class="spacer"></tr>
-                                            <tr>
-                                                <td>12/09/2019</td>
-                                                <td>Paper purchased for office printer</td>
-                                                <td>$5.00</td>
-                                                <td class="action-box"><a href="#">View</a></td>
-                                            </tr>
-                                            <tr class="spacer"></tr>
-                                            <tr>
-                                                <td>12/09/2019</td>
-                                                <td>Paper purchased for office printer</td>
-                                                <td>$5.00</td>
-                                                <td class="action-box"><a href="#">View</a></td>
-                                            </tr>
+                                        <tbody class="return_expence_ajax_history">
                                             
-                                        <tbody>
+                                            
+                                        </tbody>
                                     </table>
 
                                 </div>
@@ -1586,6 +1532,87 @@ $(document).ready(function() {
         </div>
     </div>
 </div>
+<div id="mileage-modaledit" class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+
+            <div class="modal-body">
+                <div class="col-md-12" style="margin-top:40px;margin-bottom:20px;">
+                    <form id="employee_mileageedit">
+                            
+                        <!--<div class="row">
+                            <div class="col-md-6 col-sm-6">
+                                <div class="text_outer">
+                                    <label for="name" class="">Company</label>
+                                    <select class="select_status form-control" name="companyname" id="companyname">
+                                        <option>Select</option>
+                                        @foreach($companies as $company)
+                                        <option value="{{$company->companyname}}">{{$company->companyname}}</option>
+                                       @endforeach
+                                    </select>
+                                </div>
+                                
+                            </div>
+                            
+                            <div class="col-md-6 col-sm-6">
+                                <div class="text_outer">
+                                    <label for="name" class="">Date</label>
+                                    <input type="date"  placeholder = "" name="date" class = "form-control"  >
+                                </div>
+                                
+                                
+                            </div>
+                        </div>
+                        <div class="clearfix"></div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 col-sm-6">
+                                <div class="text_outer">
+                                    <label for="name" class="">Vehicle</label>
+                                    <input type="text" id="vehicle" name="vehicle" class="form-control" placeholder="Insert text here">
+                                </div>
+                                
+                                
+                            </div>
+                            <div class="col-md-6 col-sm-6">
+                                <div class="text_outer">
+                                    <label for="name" class="">No of kilometers</label>
+                                    <input type="text" id="kilometers" name="kilometers" class="form-control" placeholder="Insert figure here">
+                                </div>
+                                
+                                
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-12 col-sm-12">
+                                <div class="text_outer">
+                                    <label for="name" class="">Reason for mileage</label>
+                                    <input type="text" id="reasonformileage" name="reasonformileage" class="form-control" placeholder="Insert text here">
+                                </div>
+                            </div>
+                            
+                        </div>
+                        </hr>               
+                        <div class="row margin-top-30">
+                            <div class="form-group" style="width:100%;">
+                                <div class="col-md-12 col-sm-12">
+                                    <button type="button" onclick="addmileage_details();" class="btn-dark contact_btn">Save</button>
+                                    <span class="close close-span" data-dismiss="modal" aria-label="Close"><i class="fa fa-arrow-left"></i> Return to Mileage</span>
+                                    
+                                </div>
+                            </div>
+                        </div>-->
+
+                    </form>
+                </div>
+                
+            </div>
+
+        </div>
+    </div>
+</div>
+
 <div id="mileage-modal" class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
@@ -1598,7 +1625,7 @@ $(document).ready(function() {
                             <div class="col-md-6 col-sm-6">
                                 <div class="text_outer">
                                     <label for="name" class="">Company</label>
-                                    <select class="select_status form-control" name="companyname">
+                                    <select class="select_status form-control" name="companyname" id="companyname">
                                         <option>Select</option>
                                         @foreach($companies as $company)
                                         <option value="{{$company->companyname}}">{{$company->companyname}}</option>
@@ -1666,6 +1693,14 @@ $(document).ready(function() {
         </div>
     </div>
 </div>
+
+<!----------Modals Faiz Expence Edit modal----------------->
+<div id="expense-modal-edit" class="modal fade bs-example-modal-lg expense-modal-edit" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+    
+    <!--ajax come modal-->
+
+</div>
+
 <div id="maintenance-modal" class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
@@ -2271,7 +2306,7 @@ $(document).ready(function() {
         
     });
     $("#old_mileage_span").click(function() {
-        alert('dsf');
+       
             $("#old_mileage_span").addClass("active-span");
             $("#active_mileage_span").removeClass("active-span");
             $("#active_mileage_div").hide();

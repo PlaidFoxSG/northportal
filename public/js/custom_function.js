@@ -9,6 +9,7 @@ function get_agreementlist()
 		data: {_token: CSRF_TOKEN},
 		success:function(response)
 		{
+			console.log(response);
 		   $(".total_agreement_list").html(response);
 		}
 	});
@@ -120,8 +121,41 @@ function edit_mileage(id)
 		dataType:'html',		
 		data: {_token: CSRF_TOKEN},
 		success:function(response)
-		{
-			$(".employeeagreements").html(response);
+		{ 
+			$("#employee_mileageedit").html(response);
+		}
+	});
+}
+
+function editmileage_details()
+{
+    //var CSRF_TOKEN = $('meta[name="csrf-token"]').attr('content');
+    var form_data = $('#employee_mileageedit').serialize();    
+    $.ajax({
+		type:'post',
+		url: './updatemileage',
+		dataType:'html',		
+		data: form_data,
+		success:function(response)
+		{ 
+			$('#mileage-modaledit').modal('hide');
+			get_mileagelist();
+		  swal("Information edited Successfully","", "success");
+		}
+	});
+}
+
+function delete_mileage(id)
+{	var CSRF_TOKEN = $('meta[name="csrf-token"]').attr('content');
+	$.ajax({
+		type:'post',
+		url: './deletemileage/'+id,
+		dataType:'html',		
+		data: {_token: CSRF_TOKEN},
+		success:function(response)
+		{ 
+			get_mileagelist();
+		  swal("Deleted Successfully","", "success");
 		}
 	});
 }
@@ -131,7 +165,7 @@ function employee_agreement()
 { var CSRF_TOKEN = $('meta[name="csrf-token"]').attr('content');
 	$.ajax({
 		type:'post',
-		url: './employeeagreement',
+		url: './employee_agreementlist',
 		dataType:'html',		
 		data: {_token: CSRF_TOKEN},
 		success:function(response)
@@ -154,6 +188,7 @@ function old_contracts()
 
 
 // Expenses code
+
 function expences_listed(){
 	var CSRF_TOKEN = $('meta[name="csrf-token"]').attr('content');
 	$.ajax({
@@ -172,6 +207,7 @@ function expences_listed(){
 $(".nav_expense").click(function(){
 	expences_listed();
 });	
+
 $('.expences').submit(function(e)
 {
     e.preventDefault();
@@ -191,3 +227,108 @@ $('.expences').submit(function(e)
 	});
 });
 
+function edit_view_ajax(id){
+	var CSRF_TOKEN = $('meta[name="csrf-token"]').attr('content');
+	$.ajax({
+		type:'POST',
+		url:"./expences_edit_view",
+		dataType:'html',
+		data: {_token: CSRF_TOKEN ,
+			   id: id},
+		success:function(response)
+		{
+	   	  resp = JSON.parse(response);
+	      $(".expense-modal-edit").html(resp.data);
+	      $(".expense-modal-edit").modal("show");
+		}
+	});
+}
+
+function edit_expences()
+{
+    var form_data =  new FormData($(".expences_edit1")[0]);
+	$.ajax({
+		type:'post',
+		url: './expences_edit',		
+		data:form_data,
+		processData: false,
+  		contentType: false,
+		success:function(response)
+		{
+		  $(".expense-modal-edit").modal("hide");
+		  expences_listed();
+		  swal("Expence Report Edit Successfully","", "success");
+		}
+	});
+}
+
+
+
+      
+function delete_expence(id){
+
+	var CSRF_TOKEN = $('meta[name="csrf-token"]').attr('content');
+	$.ajax({
+		type:'POST',
+		url:"./delete_expence",
+		dataType:'html',
+		data: {_token: CSRF_TOKEN ,
+			   id: id},
+		success:function(response)
+		{
+	   	  expences_listed();
+		  swal("Expence Report Deleted Successfully","", "success");
+		}
+	});
+
+}
+
+function expence_approve(id){
+ var CSRF_TOKEN = $('meta[name="csrf-token"]').attr('content');
+	$.ajax({
+		type:'POST',
+		url:"./expence_approve",
+		dataType:'html',
+		data: {_token: CSRF_TOKEN ,
+			   id: id},
+		success:function(response)
+		{
+	   	  expences_listed();
+		  swal("Expence Approved Successfully","", "success");
+		}
+	});
+}
+function expence_reject(id){
+ var CSRF_TOKEN = $('meta[name="csrf-token"]').attr('content');
+	$.ajax({
+		type:'POST',
+		url:"./expence_reject",
+		dataType:'html',
+		data: {_token: CSRF_TOKEN ,
+			   id: id},
+		success:function(response)
+		{
+	   	  expences_listed();
+		  swal("Expence Reject Successfully","", "success");
+		}
+	});
+}
+
+function expences_pending(id){
+ expences_listed();
+}
+
+function expences_histocial(id){
+ var CSRF_TOKEN = $('meta[name="csrf-token"]').attr('content');
+	$.ajax({
+		type:'POST',
+		url:"./expences_histocial",
+		dataType:'html',
+		data: {_token: CSRF_TOKEN},
+		success:function(response)
+		{
+	   	   resp = JSON.parse(response);
+	      $(".return_expence_ajax_history").html(resp.data);
+		}
+	});
+}
